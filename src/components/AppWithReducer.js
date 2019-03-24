@@ -6,15 +6,9 @@ import Header from './Header'
 import Movie from './Movie'
 import Search from './Search'
 
+import { movieFetcher } from '../utils'
+
 import './app.css'
-
-const API_KEY = `afe723ab`
-
-const movieFetcher = (
-  search = `man`,
-  api = API_KEY,
-  url = `https://www.omdbapi.com/`
-) => `${url}?s=${search}&apikey=${api}`
 
 const initialState = {
   loading: true,
@@ -91,7 +85,7 @@ const App = () => {
           <div className="errorMessage">{errorMessage}</div>
         ) : (
           _.map(movies, (movie, i) => (
-            <Movie key={`${i}-${movie.Title}`} movie={movie} />
+            <Movie key={`${i}-${movie.Title}-${movie.Year}`} movie={movie} />
           ))
         )}
       </div>

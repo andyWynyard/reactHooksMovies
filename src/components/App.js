@@ -1,39 +1,42 @@
 import React, { useState, useEffect } from 'react'
-import './app.css'
+import _ from 'lodash'
+import { get } from 'axios'
+
 import Header from './Header'
 import Movie from './Movie'
 import Search from './Search'
-const MOVIE_API_URL = 'https://www.omdbapi.com/?s=man&apikey=4a3b711b' // you should replace this with yours
+
+import { movieFetcher } from '../utils'
+
+import './app.css'
+
 const App = () => {
   const [loading, setLoading] = useState(true)
   const [movies, setMovies] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
+
   useEffect(() => {
-    fetch(MOVIE_API_URL)
-      .then(response => response.json())
-      .then(jsonResponse => {
-        setMovies(jsonResponse.Search)
-        setLoading(false)
-      })
+    get(movieFetcher()).then(({ data }) => {
+      setMovies(data.Search)
+      setLoading(false)
+    })
   }, [])
   const search = searchValue => {
     setLoading(true)
     setErrorMessage(null)
-    fetch(`https://www.omdbapi.com/?s=${searchValue}&apikey=4a3b711b`)
-      .then(response => response.json())
-      .then(jsonResponse => {
-        if (jsonResponse.Response === 'True') {
-          setMovies(jsonResponse.Search)
-          setLoading(false)
-        } else {
-          setErrorMessage(jsonResponse.Error)
-          setLoading(false)
-        }
-      })
+    get(movieFetcher(searchValue)).then(({ data }) => {
+      if (data.Response === 'True') {
+        setMovies(data.Search)
+        setLoading(false)
+      } else {
+        setErrorMessage(data.Error)
+        setLoading(false)
+      }
+    })
   }
   return (
     <div className="app">
-      <Header text="HOOKED" />
+      <Header text="REACT HOOKS MOVIES" />
       <Search search={search} />
       <p className="app-intro">Sharing a few of our favourite movies</p>
       <div className="movies">
@@ -42,9 +45,14 @@ const App = () => {
         ) : errorMessage ? (
           <div className="errorMessage">{errorMessage}</div>
         ) : (
-          movies.map((movie, index) => (
-            <Movie key={`${index}-${movie.Title}`} movie={movie} />
-          ))
+          movies.map((movie, index) =>
+            _.map(movies, (movie, i) => (
+              <Movie
+                key={`${index}-${movie.Title}-${movie.Year}`}
+                movie={movie}
+              />
+            ))
+          )
         )}
       </div>
     </div>
